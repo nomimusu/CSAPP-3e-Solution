@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <assert.h>
+
+//使用算数右移（由值xsra给出）实现逻辑右移
+//因为无符号数的右移必须是逻辑右移，几乎所有的编译器/机器组合对有符号数使用算数右移，该题最终实现的是逻辑右移，所以函数和参数和返回值的类型是无符号数
+unsigned srl(unsigned x, int k)
+{
+	//几乎所有的编译器/机器组合对有符号数使用算数右移
+	//此题要求是使用算数右移实现逻辑右移，所以将参数x的类型强制转换成int，再右移
+	unsigned xsra = (int)x >> k;
+	int w = sizeof(int) << 3;
+	int mask = (int)-1 << (w - k);
+
+	//xsrl是无符号数，~mask是有符号数，根据C语言的特性，如果一个运算中，一个运算数是有符号数，另一个运算数是无符号数，那么C语言会隐式地将有符号参数强制类型转换为无符号数
+	return xsra & ~mask;
+}
+
+//使用逻辑右移实现算数右移
+//因为几乎所有编译器/机器组合都对有符号数使用算数右移，所以函数的返回值和参数类型都是int
+int sra(int x, int k)
+{
+	//表达式xsrl | mask两侧都是有符号数，结果才会是有符号数，否则因为隐式强制类型转换，结果会成为无符号数
+	int xsrl = (unsigned)x >> k;
+	int w = sizeof(int) << 3;
+	int mask = (int)-1 << (w - k);
+	//mask remain unchanged when the first bit of x is 1, otherwise 0
+
+	int m = 1 << (w - 1);
+	mask &= !(x&m) - 1;
+
+
+	return xsrl | mask;
+}
+
+int main()
+{
+	int test_int = 0x12345678;
+	unsigned test_unsigned = 0x12345678;
+
+	assert(srl(test_unsigned, 3) == test_unsigned >> 3);
+	assert(sra(test_int, 3) == test_int >> 3);
+
+	test_int = 0x87654321;
+	test_unsigned = 0x87654321;
+
+	assert(srl(test_unsigned, 3) == test_unsigned >> 3);
+	assert(sra(test_int, 3) == test_int >> 3);
+
+	return 0;
+}
