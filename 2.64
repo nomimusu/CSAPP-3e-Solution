@@ -1,0 +1,16 @@
+#include <stdio.h>
+#include <assert.h>
+
+//Return 1 when any odd bit of x equals 1; 0 otherwise
+//此处的奇数位理解为二进制位下标的那个数字，32位系统中是（0-31）
+int any_odd_one(unsigned x){
+	return !!(0xAAAAAAAA & x);
+}
+
+int main()
+{
+	printf("%d", any_odd_one(0x2));
+	printf("%d",(!any_odd_one(0x4)));
+
+	return 0;
+}
