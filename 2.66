@@ -1,0 +1,47 @@
+#include <stdio.h>
+
+/*
+* Generate mask indicating leftmost 1 in x. Assume w=32
+* For example, 0xFF00 -> 0x8000, and 0x6000 -> 0x4000.
+* If x = 0, then return 0
+*/
+
+int leftmost_one(unsigned x)
+{
+	//first, generate a mask that all bits after leftmost one are one
+	//e.g. 0xff00 -> 0xffff, 0x6000 -> 0x7fff;
+	//if x = 0, get 0
+
+	//设第n次计算结果，第k位的二进制位为y（上标为n，下标为k）
+	//设参数x的三十二位二进制位的第k位为x（下标为k）
+	//e.g. x |= x >> 1，第一次计算结果，第32位（从右往左数）的二进制位为y（1，31）
+	//由穷尽观察到：
+		//y(5,31) = x(31)
+		//y(5,30) = x(30) | x(31)
+		//y(5,29) = x(29) | x(30) | x(31)
+		//y(5,28) = x(28) | x(29) | x(30) | x(31)
+		//......
+		//y(5,0) = x(0) | x(1) | x(2) | .....| x(29) | x(30) | x(31)c
+	//如果参数x不等于0，那么x的三十二位二进制位中至少有一个1
+	//最终结果的三十二位二进制位为[y(5,31),y(5,30),y(5,29),y(5,28),.....,y(5,0)]
+	//根据求出最终结果的三十二位二进制位的过程中(采用了或运算，而且x的三十二位二进制位中至少有一个1)，我们可以发现，最终结果产生了a maask that all bits after leftmost one are one
+
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x |= x >> 16;
+
+	//当x等于0时，下列表达式结果为0
+	//当x不等于0时，设mask indicating leftmost 1 in x为z，(z-1)的结果便是下列表达式中的(x >> 1)
+	return (x >> 1) + (x && 1);
+}
+
+int main()
+{
+	printf("%d\n", leftmost_one(0xff00) == 0x8000);
+	printf("%d\n", leftmost_one(0x6000) == 0x4000);
+	printf("%d\n", leftmost_one(0x0000) == 0x0000);
+
+	return 0;
+}
