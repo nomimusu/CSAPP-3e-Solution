@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+// A : 对于由w位组成的数据类型，移动k位，实际上的位移量由 k mod w得出。当移动k >= w位时亦是如此，但这种行为对于C程序来说是没有保证的，所以应该保持位移量小于待移位值的位数
+
+// B 理解问题"使得它在int至少为32位的任何机器上都能正确地运行"
+	//“正确地运行”是指，移位值小于待移位数的位数
+	//“int至少为32位的任何机器”是指int为32位的机器 或 int为64位的机器
+
+int int_size_is_32()
+{
+	//Set most significant bit(msb) of of 32-bit machine
+	int set_msb = 1 << 31;
+	//Shift past msb of 32-bit word
+	int beyond_msb = set_msb << 1;
+
+	//set_msb is nonezero when word size >= 32
+	//beyond_msb is zero when word size <= 32
+	
+	return set_msb && !beyond_msb;
+}
+
+//C 理解问题"使得它在int至少为16位的任何机器上都能正确地运行"
+//“正确地运行”是指，移位值小于待移位数的位数
+//“int至少16位的任何机器”是指int为16位的机器 或 int为32位的机器 或int为64位的机器
+
+int int_size_32_for_16bit()
+{
+	//set most significant bit of 32-bit machine
+	//位移量不超过移位数的位数，C中，int至少为16位，所以每次最大移15位
+	int set_msb = 1 << 15 << 15 << 1;
+
+	//shift past msb of 32-bit word
+	int beyond_msb = set_msb << 1;
+
+	return set_msb && !beyond_msb;
+}
+
+int main()
+{
+	printf("%d\n", int_size_is_32());
+	printf("%d\n", int_size_32_for_16bit());
+
+	return 0;
+}
