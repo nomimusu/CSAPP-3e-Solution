@@ -42,6 +42,8 @@ int main()
 	printf("%d\n", leftmost_one(0xff00) == 0x8000);
 	printf("%d\n", leftmost_one(0x6000) == 0x4000);
 	printf("%d\n", leftmost_one(0x0000) == 0x0000);
+	//test all bits after leftmost one are zero
+	printf("%d\n", leftmost_one(0x80000000) == 0x80000000);
 
 	return 0;
 }
