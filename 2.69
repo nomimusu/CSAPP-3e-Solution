@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+unsigned rotate_left(unsigned x, int n)
+{
+	int w = sizeof(int) << 3;
+
+	unsigned a = x >> (w - n - 1) >> 1;
+	x = x << n;
+
+	return x + a;
+}
+
+//简化版
+unsigned rotate_left_Simplify(unsigned x, int n)
+{
+	int w = sizeof(int) << 3;
+
+	return x << n | x >> (w - n - 1) >> 1;
+}
+
+int main()
+{
+	printf("%x\n", rotate_left(0x12345678, 20));
+
+	return 0;
+}
