@@ -1,0 +1,34 @@
+#include <stdio.h>
+
+//A: The function can't extract negative number from packed_t（packed_t是无符号整型，抽取出来的字节是无符号字节，根据题目，抽取出来的字节需要是有符号字节）
+
+//B
+typedef unsigned packed_t;
+
+int xbyte(packed_t word, int bytenum)
+{
+	int max_bytenum = 3;
+
+	//先通过左移，将指定字节移动到最高有效字节的位置，再通过算数右移，移动 (max_bytenum << 3) 位，扩展指定字节的符号位至32位int
+	//因为需要使用算数右移，所以需要将word强制类型转换为int
+
+	return (int)word << ((max_bytenum - bytenum) << 3) >> (max_bytenum << 3);
+} 
+
+int main()
+{
+	printf("%d\n", xbyte(0x00112233, 0) == 0x33);
+	printf("%d\n", xbyte(0x00112233, 1) == 0x22);
+	printf("%d\n", xbyte(0x00112233, 2) == 0x11);
+	printf("%d\n", xbyte(0x00112233, 3) == 0x00);
+
+	printf("%d\n", xbyte(0xAABBCCDD, 0) == 0xFFFFFFDD);
+	printf("%d\n", xbyte(0xAABBCCDD, 1) == 0xFFFFFFCC);
+	printf("%d\n", xbyte(0xAABBCCDD, 2) == 0xFFFFFFBB);
+	printf("%d\n", xbyte(0xAABBCCDD, 3) == 0xFFFFFFAA);
+
+	return 0;
+}
+
+
+
