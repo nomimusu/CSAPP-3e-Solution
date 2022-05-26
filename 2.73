@@ -1,0 +1,38 @@
+#include <stdio.h>
+
+int saturating_add(int x, int y)
+{
+	int sum = x + y;
+	//All bits but most significant bit of sig_mask are 0, most significant bit is 1
+	int sig_mask = 0x80000000;
+
+	//if x > 0, y > 0 but sum < 0, it is a positive overflow
+	//if x < 0, y < 0 but sum > 0, it is a negative overflow
+
+	//if x > 0, the most significant bit of x is 0;
+	//if y > 0, the most significant bit of y is 0;
+	//if sum < 0, the most significant bit of sum is 1;
+
+	int pos_over = !(x & sig_mask) && !(y & sig_mask) && (sum & sig_mask);
+
+	//if x < 0, the most significant bit of x is 1;
+	//if y < 0, the most significant bit of y is 1;
+	//if sum > 0, the most significant bit of sum is 0;
+	int neg_over = (x & sig_mask) && (y & sig_mask) && !(sum & sig_mask);
+
+	//如果pos_over等于1，将TMax赋值给sum，返回sum
+	//如果neg_over等于1，将TMin赋值给sum，返回sum
+	//逻辑或运算||，当左运算数判断为真时，那么就不再计算又运算数
+	((pos_over) && (sum = 0x7fffffff)) || ((neg_over) && (sum = 0x80000000));
+
+	return sum;
+}
+
+int main()
+{
+	printf("%d\n", saturating_add(0x7fffffff, 0x1234) == 0x7fffffff);
+	printf("%d\n", saturating_add(0x80000000, -0x1234) == 0x80000000);
+	printf("%d\n", saturating_add(0x1234, 0x1234) == 0x2468);
+
+	return 0;
+}
