@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <inttypes.h>
+
+int signed_high_prod(int x, int y)
+{
+	int64_t mul = (int64_t)x*y;
+
+	return mul >> 32;
+}
+
+//设X，Y为有符号数，X'，Y'为无符号数，X和X'，Y和Y'的二进制位表示一样
+//设X的最高有效位为sig_X，Y的最高有效位为sig_Y
+//根据公式 X'* Y' = (X*Y + (X*sig_Y + Y*sig_X)*（2的W位次方）+ sig_X * sig_Y * (2的2W次方))
+//因为要取X' * Y'的完整2W位表示的高W位，所以相当于将X'* Y'右移W位，根据无符号数除法的规则，就相当于X'*Y'除以2的W次方
+// X'* Y' 除以 2的W次方
+//(X*Y + (X*sig_Y + Y*sig_X)*（2的W位次方）+ sig_X * sig_Y * (2的2W次方)) 除以2的W次方 -> signed_high_prod(x,y) + X*sig_Y + Y*sig_X
+//sig_X * sig_Y * (2的2W次方)之所以没了，是因为要取X' * Y'的完整的2W位的高W位，sig_X * sig_Y * (2的2W次方)除以 2的W次方，等于sig_X * sig_Y * (2的W次方），因为截断，所以没了
+unsigned unsigned_high_prod(unsigned x, unsigned y)
+{
+	int sig_x = x >> 31;
+	int sig_y = y >> 31;
+	int sign_prod = signed_high_prod(x, y);
+
+	return sign_prod + x * sig_y + y * sig_x;
+}
+
+unsigned another_unsigned_high_prod(unsigned x, unsigned y)
+{
+	uint64_t mul = (uint64_t)x*y;
+	return mul >> 32;
+}
+
+int main()
+{
+	unsigned x = 0x12345678;
+	unsigned y = 0xffffffff;
+
+	printf("%d\n", unsigned_high_prod(x, y) == another_unsigned_high_prod(x, y));
+
+	return 0;
+}
