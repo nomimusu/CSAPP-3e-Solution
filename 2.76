@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+
+//Rename to avoid conflict
+void* another_calloc(size_t nmemb, size_t size)
+{
+	if (nmemb == 0 || size == 0)
+	{
+		return NULL;
+	}
+
+	size_t buf_size = nmemb * size;
+
+	//Check the result of nmemb multiplying size is overflow or not
+	if (nmemb == buf_size / size)
+	{
+		void* ptr = malloc(nmemb * size);
+		if (ptr != NULL)
+		{
+			memset(ptr, 0, buf_size);
+		}
+		//In the case of ptr == NULL or ptr!= NULL, return ptr is ok
+		return ptr;
+	}
+
+	//the result of nmemb multiplying size is overflow
+	return NULL;
+}
+
+int main()
+{
+	void* f = another_calloc(0x1234, 1);
+	printf("%d\n", f != NULL);
+	free(f);
+
+	f = another_calloc(SIZE_MAX, 2);
+	printf("%d\n", f == NULL);
+	free(f);
+
+	return 0;
+}
