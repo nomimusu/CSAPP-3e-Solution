@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+int A(int x)
+{
+	return (x << 4) + x;
+}
+
+int B(int x)
+{
+	return x - (x << 3);
+}
+
+int C(int x)
+{
+	return (x << 6) - (x << 2);
+}
+
+int D(int x)
+{
+	return (x << 4) - (x << 7);
+}
+
+int main()
+{
+	int x = 0x1234;
+	printf("%d\n", x* 17 == A(x));
+	printf("%d\n", x*(-7) == B(x));
+	printf("%d\n", x*60 == C(x));
+	printf("%d\n", x*(-112) == D(x));
+
+	return 0;
+}
