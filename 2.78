@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include <limits.h>
+
+int divide_power2(int x, int k)
+{
+	//判断x是负数，还是非负数
+	int is_neg = x & INT_MIN;
+	
+	//如果is_neg等于0，返回x >> k
+	//如果is_neg不等于0，返回 (x + (1 >> k) - 1) >> k;
+	is_neg && (x = x + (1 << k) - 1);
+
+	return x >> k;
+}
+
+int main()
+{
+	int x = 0x12345678;
+	int y = 0x803423fa;
+
+	printf("%d\n", divide_power2(x, 2) == x / 4);
+	printf("%d\n", divide_power2(y, 3) == y / 8);
+
+	return 0;
+}
