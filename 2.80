@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <limits.h>
+
+//Caculate 3/4x, no overflow, round to zero
+//no overflow, means divide 4 first, then multiply 3
+//every int x, equals f(first 30 bits number) plus l(last 2 number),f is divisible by 4
+// f = x & ~0x3
+// l = x & 0x3
+// x = f + l
+// threefourths(x) = f/4 * 3 + l*3/4 (no overflow means f divide 4 first, then multiply 3)
+// f is divisible by 4, f/4 * 3 has no influence on rounding, rounding is influenced by l*3/4
+//when x > 0, f/4 * 3 ≥ 0, l*3/4 round to zero, └ x/4 * 3 ┘ = └ f/4 * 3 + l*3/4 ┘
+//when x < 0, x/4 * 3 < 0, round to zero, ┌x/4 * 3┐ = ┌f/4 * 3 + l*3/4┐
+// f/4 * 3 is divisible by 4, so it doesn't need add bias to ensure round to zero
+//but x/4 * 3 still needs round to zero, we need to make some change on l*3/4
+// l equals 0,1,2,3, then l*3/4 equals 0, 3/4, 6/4, 9/4。
+//when l*3/4 equals 0,┌x/4 * 3┐ = ┌f/4 * 3 + l*3/4┐= f/4*3
+//when l*3/4 equals 3/4,┌x/4 * 3┐ = ┌f/4 * 3 + l*3/4┐= f/4*3 + 1
+//when l*3/4 equals 6/4,┌x/4 * 3┐ = ┌f/4 * 3 + l*3/4┐= f/4*3 + 2;
+//when l*3/4 equals 9/4,┌x/4 * 3┐ = ┌f/4 * 3 + l*3/4┐= f/4*3 + 3;
+//l≥0, l*3/4 round down by default, so we need to make l*3/4 round up
+//according to theorem ┌x/y┐ = └(x+y-1)/y┘,┌l*3/4┐ = └(l*3+4-1)/4┘,we can make l*3/4 round up
+
+int threeforths(int x)
+{
+	int f = x & ~0x3;
+	int l = x & 0x3;
+	int is_neg = x & INT_MIN;
+
+	int fd4 = f >> 2;
+	int fd4m3 = (fd4 << 1) + fd4;
+
+	int lm3 = (l << 1) + l;
+	(is_neg && (lm3 += 3));
+	int lm3d4 = lm3 >> 2;
+
+	return fd4m3 + lm3d4;
+
+}
+
+
+int main()
+{
+	printf("%d\n",threeforths(8) == 6);
+	printf("%d\n", threeforths(9) == 6);
+	printf("%d\n", threeforths(10) == 7);
+	printf("%d\n", threeforths(11) == 8);
+	printf("%d\n", threeforths(12) == 9);
+
+	printf("%d\n", threeforths(-8) == -6);
+	printf("%d\n", threeforths(-9) == -6);
+	printf("%d\n", threeforths(-10) == -7);
+	printf("%d\n", threeforths(-11) == -8);
+	printf("%d\n", threeforths(-12) == -9);
+
+	return 0;
+}
