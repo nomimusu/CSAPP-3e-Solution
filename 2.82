@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <limits.h>
+
+// A. (x<y) == (-x > -y) is wrong, when x is INT_MIN. -x equals INT_MIN
+int main()
+{
+	int a = INT_MIN;
+	int b = -a;
+	printf("%d\n", a == b);
+
+	return 0;
+}
+
+// B. ((x+y)<<4)+y-x == 17*y +15*x is right
+// => (x+y)*16 + y -x = 17*y + 15*x
+
+// C. ~x + ~y +1 = ~(x+y) is right
+// => ~x + 1 + ~y + 1 - 1 = -x + -y -1 = -(x+y)-1 = ~(x+y)
+
+// D. (ux - uy) == -(unsigned)(y-x) is right
+// TBD
+
+// ((x>>2)<<2) <= x is right
+// (x>>2)<<2 
+// => x & ~0x3
+// => x - num(00/01/02/03)
+// => ((x>>2)<<2) <= x
