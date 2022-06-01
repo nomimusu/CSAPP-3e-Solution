@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <limits.h>
+
+unsigned f2u(float x)
+{
+	return *(unsigned*)&x;
+}
+
+int float_le(float x, float y)
+{
+	unsigned ux = f2u(x);
+	unsigned uy = f2u(y);
+
+	unsigned sx = ux >> 31;
+	unsigned sy = uy >> 31;
+
+	return (ux << 1 == 0 && uy << 1 == 0) ||
+		(sx && !sy) ||
+		(!sx && !sy && ux <= uy) ||
+		(sx && sy && ux >= uy);
+
+}
+
+//只要符合以下四种情况中的任何一种，都可以证明x小于或等于y
+//情况一：x = +0.0 或 -0.0；y = +0.0 或 -0.0
+// ux << 31 == 0 && uy << 31 == ;
+
+//情况二：x<= 0, y > 0 or x < 0, y >= 0
+// sx && !sy
+// 理解 ： sx && !sy 为真 => 1 && 1, 即 sx == 1, sy == 0 
+// => x <= 0, y >= 0,因为情况一已经表示x，y皆为0的情况，x ,y不同时为0
+// => x <= 0, y > 0 或 x < 0, y >= 0，两种情况下，x都是小于y的
+
+//情况三：x >= 0, y > 0 或 x > 0, y >= 0；同时排除 x > 0, y = 0的情况
+// !sx && !sy && ux <= uy
+// 理解：!sx && !sy && ux <= uy 为真 => sx == 0, sy == 0, ux <= uy
+// sx == 0 => x >= 0 ; sy == 0 => y >= 0
+// 因为情况一已经表示了x,y皆为0的情况，x, y不同时为0
+// => x>=0, y > 0 或 x > 0, y >= 0;
+// 在二进制表示相同的情况下，符号位为0，浮点数大小与对应的无符号数大小成正相关关系
+// ux <= uy
+// => x <= y
+
+//情况四：x <= 0, y < 0 或 x < 0, y <=0;同时排除 x = 0 , y < 0的情况
+// sx && sy && ux >= uy
+// 理解：sx && sy && ux >= uy 为真 => sx == 1, sy == 1, ux >= uy
+// => x <= 0, y <=0
+//因为情况一已经表示了x，y皆为0的情况，所以x，y不同时为0
+// =》 x <= 0, y < 0 或 x < 0, y <= 0
+//在二进制位表示相同的情况下，符号位为1，浮点数大小与对应的无符号数大小为负相关
+// ux >= uy
+// x <= y
+
+int main()
+{
+	printf("%d\n", 1 == float_le(+0.0, -0.0));
+	printf("%d\n", 1 == float_le(-0.0, +0.0));
+	printf("%d\n", 1 == float_le(0, 3));
+	printf("%d\n", 1 == float_le(-4, -1));
+	printf("%d\n", 1 == float_le(-4, 4));
+
+	return 0;
+
+}
