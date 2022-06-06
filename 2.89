@@ -1,0 +1,8 @@
+// 浮点数的舍入：因为表示方法(V = (-1)^s * M * 2^E)限制了浮点数的精度和范围，所以浮点运算只能近似地表示实数运算。
+//因此对于值x，我们一般想用一种系统的方法，能够找到一个“最接近”的匹配值x',x'是能够以期望的浮点形式表示出来
+
+// A (float)x ==  (float)dx is right
+// int转换成float，数字不会溢出（在32位的情况下，FLOAT_MAX > INT_MAX, FLOAT_MIN < INT_MIN，但转换后，也有可能是＋∞或-∞或NaN），但可能被舍入（对于某些整型值x，我们只能找到“最接近的”近似值x'，x'能够以期望的浮点形式进行表示）
+// double转换成float,因为范围要小一些，所以值可能溢出为+∞或-∞。另外由于精确度较小，还可能被舍入
+
+//https://stackoverflow.com/questions/41355213/casting-between-int-float-and-double-in-c
