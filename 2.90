@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <math.h>
+
+float u2f(unsigned x)
+{
+	return *(float*)&x;
+}
+
+// 2^x = (-1)^s * 2^E * M
+float fpwr2(int x)
+{
+	unsigned exp, frac;
+	unsigned u;
+
+	//2^x > 0; 根据题意，当2^x小于非规格化数所能够表示的最小正数时，程序返回0.0
+	// 非规格化数的最小正数 = 2^(2-pow(2,7)) * 2^(-23) = 2^(2-pow(2,7)-23)
+	if (x < 2-pow(2.0,7.0)-23)
+	{
+		frac = 0;
+		exp = 0;
+	}
+	//规格化数与非规格化数之间的临界值是2^(1-bias)
+	//当2^x能够以非规格化数进行表示时,x < 1 - bias
+	// 2^x = 2^(1-bias)*M => M = 2^(x-1+bias)
+	//因为frac是无符号整型，所以需要进行左移23位
+	// frac = M*2^23 = 2^(x-1+bias+23)
+	else if (x < 2 - pow(2.0,7.0))
+	{
+		exp = 0;
+		frac = 1 << (unsigned)(x-(2-pow(2.0,7.0))+23);
+	}
+	//规格化数与+∞之间的临界值是2^(2^7)
+	//当2^x能够以规格化数的形式表示时，x < 2^7
+	// 2^x = 2^E * M (2＞M≥1) => M = 2^(x-E) => 2^1＞2^(x-E)≥2^0 => 1＞x-E≥0
+	//因为x和E都是整数，所以只有当x=E时，才满足上述不等式
+	//e = E + bias => x + pow(2.0,7.0)-1
+	else if (x < pow(2.0, 7.0))
+	{
+		exp = x + pow(2.0, 7.0) - 1;
+		frac = 0;
+	}
+	//x太大，超出规格化数所能够表示的范围
+	else
+	{
+		exp = 0xff;
+		frac = 0;
+	}
+
+	//将exp和frac封装成32位二进制表示，并转化为float
+	//操作符优先级：<< 高于 |, |高于 =
+	u = exp << 23 | frac;
+
+	return u2f(u);
+}
+
+int main()
+{
+	printf("%d\n",fpwr2(0) == powf(2, 0));
+	printf("%d\n", fpwr2(100) == powf(2, 100));
+	printf("%d\n", fpwr2(-100) == powf(2, -100));
+	printf("%d\n", fpwr2(10000) == powf(2, 10000));
+	printf("%d\n", fpwr2(-10000) == powf(2, -10000));
+
+	return 0;
+}
