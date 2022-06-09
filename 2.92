@@ -1,0 +1,41 @@
+#include <stdio.h>
+
+typedef unsigned float_bits;
+
+float_bits float_negate(float_bits f)
+{
+	unsigned sig = f >> 31;
+	unsigned exp = f >> 23 & 0xff;
+	unsigned frac = f & 0x7fffff;
+
+	int is_NaN = (exp == 0xff) && (frac != 0);
+
+	if (is_NaN)
+	{
+		return f;
+	}
+
+	return (~sig << 31) | (exp << 23) | frac;
+}
+
+int main()
+{
+	//自己的想法：%f & %d 只是以不同的编码形式输出底层的二进制位，底层的二进制位是不会发生改变的，所以预期的输出结果是-8
+
+	//Quora: The %f format specifier is used to represent fractional values.It is used in the printf() function to print the
+	//fractional or floating value stored in the varible.The value stored in the float variable can be retrieved and printed by using the %f format specifier
+	//It is a reference to an fractional or floating data
+	//link: https://www.quora.com/What-does-f-mean-in-the-C-programming-language-and-what-does-the-f-in-printf-and-scanf-mean
+
+	//the returned value of float_negate function is unsigned, not float. This is why the printf function prints 0.00000 onto the
+	//screnn console when I use %f format specifier to retrieve and print the return value of float_negate function
+
+	printf("%f\n", float_negate(8));
+	return 0;
+
+	//前辈意见：重新解释地址 => printf -0.00000 onto screen console
+	/*float_bits result = float_negate(8);
+	float* ret = (float*)&result;
+	printf("%f\n", *ret);
+	return 0;	*/
+}
