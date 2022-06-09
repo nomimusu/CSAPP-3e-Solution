@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+typedef unsigned float_bits;
+
+float_bits float_negate(float_bits f)
+{
+	unsigned sig = f >> 31;
+	unsigned exp = f >> 23 & 0xff;
+	unsigned frac = f & 0x7fffff;
+
+	int is_NaN = (exp == 0xff) && (frac != 0);
+
+	if (is_NaN)
+	{
+		return f;
+	}
+
+	if (sig == 0)
+		return (sig << 31) | (exp << 23) | frac;
+	else
+		return (~sig << 31) | (exp << 23) | frac;
+
+	// 更简便的解法：return (0<<31) | (exp<<23) | frac;
+}
