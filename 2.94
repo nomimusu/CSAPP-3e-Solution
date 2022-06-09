@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+typedef unsigned float_bits;
+
+float_bits	float_twice(float_bits f)
+{
+	unsigned sign = f >> 31;
+	unsigned exp = f >> 23 & 0xff;
+	unsigned frac = f & 0x7fffff;
+	
+	//if f是NaN，那么exp == 0xff,frac !=0，返回f;
+	//if f是∞，那么exp == 0xff, frac == 0, f * 2.0 的值依旧是f，因为f是∞
+	//由浮点数的规则可知，当我们把两个非常大的数相乘，或者除以零时，无穷能够表示溢出的结果
+	int is_NaN_or_∞ = (exp == 0xff);
+	if (is_NaN_or_∞)
+	{
+		return f;
+	}
+
+	//denormalized 
+	if (exp == 0)
+	{
+		//当浮点数是非规格化数时，E的值是固定的，如果要正确表示f*2.0的二进制位表示，要让M*2.0
+		frac <<= 1;
+	}
+	//当exp == 0xff-1时，f为规格化数，f*2.0 => e+1 = E + bias + 1,exp = 0xff, f*2.0就表示无穷（至于为什么不表示NaN,暂时不了解）
+	//twice to ∞
+	else if (exp == 0xff - 1)
+	{
+		exp = 0xff;
+		frac = 0;
+	}
+	else{
+		//Normalized
+		exp += 1;
+	}
+
+	return sign << 31 | exp << 23 | frac;
+}
