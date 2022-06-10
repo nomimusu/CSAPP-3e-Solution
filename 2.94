@@ -11,6 +11,7 @@ float_bits	float_twice(float_bits f)
 	//if f是NaN，那么exp == 0xff,frac !=0，返回f;
 	//if f是∞，那么exp == 0xff, frac == 0, f * 2.0 的值依旧是f，因为f是∞
 	//由浮点数的规则可知，当我们把两个非常大的数相乘，或者除以零时，无穷能够表示溢出的结果
+	//另一种理解：∞乘以任何数，依旧是无穷，但会影响结果是正无穷还是负无穷
 	int is_NaN_or_∞ = (exp == 0xff);
 	if (is_NaN_or_∞)
 	{
