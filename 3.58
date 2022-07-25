@@ -1,0 +1,6 @@
+long decode2(long x, long y, long z)
+{
+	y -= z;
+	x*= y;
+	return (x%2 == 0?x:~x);
+}
