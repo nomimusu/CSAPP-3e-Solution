@@ -1,0 +1,36 @@
+#mulq %rsi(运算过程)
+int64_t x和ux，int64_t y和uy，有相同的64位表示
+
+ux = x + sig_x * 2^64
+uy = y + sig_y * 2^64
+
+ux*uy = (x + sig_x * 2^64)*(y + sig_y * 2^64) = x*y + (sig_x*y + sig_y*x)*2^64 + sig_x*sig_y*2^128
+
+因为mulq是8字无符号乘法，只保留128位，所以截断为128位后，进行无符号编码，得到的无符号数是
+ux*uy = x*y + (sig_x*y + sig_y*x)*2^64 => x*y = ux*uy - (sig_x*y + sig_y*x)*2^64
+
+在上式中，x*y是补码乘法的二进制位的十进制表示，ux*uy是无符号乘法的二进制位的十进制表示
+根据“无符号数与补码乘法的位级等价性”，x*y和ux*uy的低64位是相等的
+要求得x*y的高64位，需要将128位的x*y右移64位，高64位移动到低64位，高64位由符号位补上，根据原理“补码的符号扩展”不改变补码数大小
+
+所以x*y右移64位之后的补码数，就原x*y高64位表示的补码数
+
+所以(x*y)(高64位) = x*y / 2^64 = [ux*uy - (sig_x*y + sig_y*x)*2^64]/2^64 = (ux*uy)(高64位)-(sig_x*y + sig_y*x)
+
+
+
+
+#store_prod:
+	movq %rdx, %rax // %rax = y
+	cqto            // %rdx = -sig_y
+	movq %rsi, %rcx // %rcx = x
+	sarq $63, %rcx  // %rcx = -sig_x
+	imulq %rax, %rcx // %rcx = y*-sig_x
+	imulq %rsi, %rdx // %rdx = x*-sig_y
+	addq %rdx, %rcx // %rcx = y*-sig_x + x*-sig_y
+	mulq %rsi       // %rdx:%rax <= ux*uy(mulq为8字无符号乘法,将%rax和%rsi保存的64位用无符号进行编码，然后相乘，%rdx保存的是ux*uy的高64位，%rax保存的是ux*uy的低64位)
+	                // int64_t x和ux，int64_t y和uy，有相同的64位表示，根据“无符号和补码乘法的位级等价性”，ux*uy和x*y的低64位是相等的
+	addq %rcx, %rdx // %rdx = (ux*uy)(high 64 bytes) - (y*sig_x + x*sig_y)
+	
+	movq %rax,(%rdi) // set low 64 bytes 
+	movq %rdx, 8(%rdi) // set high 64 bytes
