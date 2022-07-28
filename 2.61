@@ -1,0 +1,29 @@
+long cread(long *xp){
+	return (xp?*xp:0);
+}
+
+compile function cread:
+cread:
+	movq (%rdi),%rax // v = *xp
+	testq %rdi, %rdi // Test xp
+	movl $0, %edx // ve = 0;
+	cmove %rdx, %rax // If xp == NULL, v = ve;
+	ret
+	
+long cread_alt(long*xp){
+	return(!xp?0:*xp);
+}
+
+compile function cread_alt:
+cread_alt:
+	movl $0, %eax // v = 0;
+	testq %rdi, %rdi // Test xp;
+	cmovne (%rdi),%rax // If xp != NULL, v = *xp
+	
+int main()
+{
+	long a = 0;
+	assert(cread(&a) == cread_alt(&a));
+	assert(cread(NULL) == cread_alt(NULL));
+	return 0;
+}
