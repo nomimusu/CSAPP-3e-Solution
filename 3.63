@@ -1,0 +1,31 @@
+sub $0x3c, %rsi // n -= 60
+cmp $0x5, %rsi 
+ja 4005c3       // 如果n>5, 跳转到地址0x4005c3
+jmpq *0x4006f8(,%rsi,8)  //查询内存地址(0x4006f8+8n)上保存的64位地址，并且直接跳转到该地址
+// n=60 -> n -= 60 -> n = 0 -> 0x4006f8+8n = 0x4006f8,上面保存的64位地址为0x4005a1, 操作是result = 8x;
+// n=61 -> n -= 60 -> n = 1 -> 0x4006f8+8n = 0x400700,上面保存的64位地址为0x4005c3, 操作是result = 0x4b+x;
+// n=62 -> n -= 60 -> n = 2 -> 0x4006f8+8n = 0x400708,上面保存的64位地址为0x4005a1, 操作是result = 8x;
+// n=63 -> n -= 60 -> n = 3 -> 0x4006f8+8n = 0x400710,上面保存的64位地址为0x4005aa, 操作是result = x >> 3;
+// n=64 -> n -= 60 -> n = 4 -> 0x4006f8+8n = 0x400718,上面保存的64位地址为0x4005b2, 操作是x = (x<<4)-x;
+// n=65 -> n -= 60 -> n = 5 -> 0x4006f8+8n = 0x400720,上面保存的64位地址为0x4005bf, 操作是x = x*x;
+
+long switch_prob(long x, long n){
+	long result = x;
+	switch(n){
+		case 60:
+		case 62:
+			result = 8x;
+			break;
+		case 63:
+			result = x >> 3;
+			break;
+		case 64:
+			x = (x<<4)-x;
+		case 65:
+			x = x*x;
+		default:
+			result = 0x4B + x;
+	}
+	return result;
+}
+			
