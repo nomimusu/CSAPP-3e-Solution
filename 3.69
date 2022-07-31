@@ -1,0 +1,26 @@
+习题3.69
+
+#结合指令 movslq %ecx, %rcx 和 C代码 ap->x[ap->idx] = n;可知
+1) x是一个元素类型为long的数组，idx为整型(int or long)
+2) 存储结构体a_struct的内存地址为8的倍数
+3) 存储结构体b_struct的内存地址为8的倍数
+
+#结合数据对齐，由2),3)可知
+4) &bp->a[0] == bp + 8
+5) &bp->a[i] == bp + 8 + sizeof(a_struct)*i
+
+#结合5),指令lea (%rsi,%rax,8),%rax 和 指令mov 0x8(%rax),%rdx,可知
+6) ap == &bp->a[i] == bp+8+40i, 所以 sizeof(a_struct) == 40
+
+#mov %rcx, 0x10(%rax,%rdx,8)，即bp+40i+8*(*ap)+0x8+0x8
+bp+40i+0x8是ap
+bp+40i+0x8+0x8是跳过a_struct内的第一个元素，即a_struct的第一个元素为8字节，bp+40i+0x8+0x8是ap->x[0]的地址, a_struct的第一个元素为idex，类型为long
+因为idx是a_struct的第一个元素，所以ap->idx == *ap, 所以bp+40i+0x8+0x8+8*(*ap)就是ap->x[ap->idx]的地址
+
+typedef struct{
+	long idx;
+	long x[7];
+} a_struct;
+
+7*40+8 = 288 = 0x120
+所以CNT = 7
