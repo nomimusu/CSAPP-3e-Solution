@@ -1,0 +1,16 @@
+习题 3.70
+
+movq 8(%rdi),%rax
+// R[%rax] = M[8+R[%rdi]], R[%rdi]是指针up，up+8也是一个指针，R[%rax] = M[8+R[%rdi]]指，在内存地址up+8上保存的值复制到%rax，暂时我们不知道是什么
+movq (%rax),%rdx
+// R[%rdx] = M[R[%rax]], 由M[R[%rax]]可知，%rax上保存的是一个地址，即内存地址up+8上保存的值是一个地址，即up->e2.next
+// R[%rdx] = M[R[%rax]]指，将内存地址（同时也是结构体ele的地址）up->e2.next上保存的值复制到%rdx，暂时我们不知道是什么
+movq (%rdx),%rdx
+// R[%rdx] = M[R[%rdx]],可知%rdx上保存的是一个地址，即内存地址（同时也是结构体ele的地址）up->e2.next上保存的值是一个地址，即*(up->e2.next).e1.p
+// R[%rdx] = M[R[%rdx]],将内存地址*(up->e2.next).e1.p的值(即*(*(up->e2.next).e1.p))复制到R[%rdx]
+subq 8(%rax),%rdx
+// R[%rdx] = R[%rdx] - M[8+R[%rax]],8+R[%rax],%rax上保存的是一个地址，即内存地址up+8上保存的值是一个地址，即up->e2.next
+//M[8+R[%rax]],表示取地址8+R[%rax]上的值，即long y, 即*(up->e2.next).e1.y
+//R[%rdx] = R[%rdx] - M[8+R[%rax]] 等价于R[%rdx] = *(*(up->e2.next).e1.p)) - *(up->e2.next).e1.y
+movq %rdx,(%rdi)
+// M[R[%rdi]] = R[%rdx], 表示将%rdx上保存的值(*(*(up->e2.next).e1.p)) - *(up->e2.next).e1.y)复制到内存地址up上
