@@ -1,0 +1,31 @@
+习题 3.73 汇编代码
+
+vxorps %xmm1, %xmm1, %xmm1 // set %xmm1 = 0
+vucomiss %xmm1, %xmm0 // compare x : 0
+jp .P // if NaN, goto .P
+ja .A // if > 0, goto .A
+jb .B // if < 0, goto .B
+je .E // if == 0, goto .E
+.A:
+movl $2, %eax // set %eax = 2
+jmp .Done // goto .Done
+.B:
+movl $0, %eax // set %eax = 0
+jmp .Done // goto .Done
+.E:
+movl $1, %eax // set %eax = 1
+jmp .Done // goto .Done
+.P:
+movl $3, %eax // set %eax = 3
+.Done:
+
+习题3.74 汇编代码
+vxorps %xmm1, %xmm1, %xmm1 // set %xmm1 = 0
+movq $1, %rax // set %rax = 1
+movq $2, %r8 // set %r8 = 2
+movq $0, %r9 // set %r9 = 0
+movq $3, %r10 // set %r10 = 3
+vucomiss %xmm1, %xmm0 // compare x : 0
+cmovaq %r8, %rax // if > 0, set %rax = %r8
+cmovbq %r9, %rax // if < 0, set %rax = %r9
+cmovpq %r10, %rax // if NaN, set %rax = %r10
