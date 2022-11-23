@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <climits>
+
+void* basic_memset(void* s, int c, size_t n) {
+	size_t cnt = 0;
+	unsigned char* schar = (unsigned char*)s;
+	while (cnt < n) {
+		*schar++ = (unsigned char)c;
+		cnt++;
+	}
+
+	return s;
+}
+
+void* effective_memset(void* s, unsigned long cs, size_t n) {
+	size_t cnt = 0;
+	size_t K = sizeof(unsigned long);
+	unsigned char* schar = (unsigned char*)s;
+
+	// align to K
+	while (cnt < n) {
+		//一个整数的末3位若能被8整除，则该数一定能被8整除。
+		if ((size_t)schar % K == 0) {
+			break;
+		}
+		*schar++ = (unsigned char)cs;
+		cnt++;
+	}
+
+	// set K chars one time
+	size_t rest = n - cnt;
+	size_t loop = rest / K;
+	size_t tail = rest % K;
+	unsigned long* slong = (unsigned long*)schar;
+	for (size_t i = 0; i < loop; i++) {
+		*slong++ = cs;
+	}
+
+	// Pad the tail part
+	schar = (unsigned char*)slong;
+	for (size_t i = 0; i < tail; i++) {
+		*schar++ = (unsigned char)cs;
+	}
+
+	return s;
+}
